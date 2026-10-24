@@ -23,19 +23,44 @@ st.set_page_config(
 # ==========================================
 
 st.markdown("""
+
 <style>
+    /* Main application background */
     .stApp {
         background-color: #F4F7FB;
     }
 
+    /* Dark blue sidebar */
     [data-testid="stSidebar"] {
         background-color: #102A43;
     }
 
+    /* Sidebar text */
     [data-testid="stSidebar"] * {
         color: white !important;
     }
 
+    /* FIX: Business Settings input boxes */
+    [data-testid="stSidebar"] input,
+    [data-testid="stSidebar"] textarea {
+        background-color: #1E293B !important;
+        color: #FFFFFF !important;
+        -webkit-text-fill-color: #FFFFFF !important;
+        border: 1px solid #D4AF37 !important;
+        border-radius: 6px !important;
+        caret-color: #FFFFFF !important;
+    }
+
+    /* Keep text visible while typing */
+    [data-testid="stSidebar"] input:focus,
+    [data-testid="stSidebar"] textarea:focus {
+        background-color: #1E293B !important;
+        color: #FFFFFF !important;
+        -webkit-text-fill-color: #FFFFFF !important;
+        border: 2px solid #D4AF37 !important;
+    }
+
+    /* Main title */
     .main-title {
         font-size: 38px;
         font-weight: 800;
@@ -43,18 +68,21 @@ st.markdown("""
         margin-bottom: 0;
     }
 
+    /* Subtitle */
     .subtitle {
         font-size: 16px;
         color: #627D98;
         margin-bottom: 25px;
     }
 
+    /* Section headings */
     .section-title {
         color: #102A43;
         font-size: 23px;
         font-weight: 700;
     }
 
+    /* Dashboard metric cards */
     div[data-testid="stMetric"] {
         background-color: white;
         border: 1px solid #E1E8F0;
@@ -72,6 +100,7 @@ st.markdown("""
         color: #102A43;
     }
 
+    /* Buttons */
     div.stButton > button,
     div.stFormSubmitButton > button {
         background-color: #087F5B;
@@ -82,6 +111,7 @@ st.markdown("""
         padding: 9px 18px;
     }
 
+    /* Footer */
     .footer {
         text-align: center;
         color: #829AB1;
@@ -89,6 +119,7 @@ st.markdown("""
         padding: 25px 0 10px 0;
     }
 </style>
+
 """, unsafe_allow_html=True)
 
 
