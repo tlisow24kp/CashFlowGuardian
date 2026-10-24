@@ -16,22 +16,7 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="expanded"
 )
-# ==========================================
-# LOGIN AND AUTHENTICATION
-# ==========================================
 
-from auth import show_auth_page, logout_button
-
-if "user" not in st.session_state:
-    show_auth_page()
-    st.stop()
-
-current_user = st.session_state["user"]
-
-st.sidebar.success(f"Logged in as: {current_user['username']}")
-st.sidebar.write(f"Business: {current_user['business_name']}")
-
-logout_button()
 
 # ==========================================
 # PROFESSIONAL DESIGN
