@@ -1,4 +1,5 @@
 import sqlite3
+import html
 from pathlib import Path
 from datetime import date, timedelta
 
@@ -60,7 +61,6 @@ def initialise_database():
         """
     )
 
-    # Support an older database that does not yet have user_id.
     columns = connection.execute(
         "PRAGMA table_info(transactions)"
     ).fetchall()
@@ -129,21 +129,36 @@ st.markdown(
     """
     <style>
 
-    /* Main application background */
+    /* ==========================================
+       GENERAL APPLICATION DESIGN
+       ========================================== */
 
     .stApp {
         background-color: #F4F7FB;
     }
 
-    /* Main content spacing */
-
     .block-container {
         padding-top: 2rem;
         padding-bottom: 2rem;
         max-width: 1500px;
+        animation: dashboardEnter 0.8s ease-out both;
     }
 
-    /* Sidebar */
+    @keyframes dashboardEnter {
+        from {
+            opacity: 0;
+            transform: translateY(14px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* ==========================================
+       SIDEBAR
+       ========================================== */
 
     section[data-testid="stSidebar"] {
         background-color: #102A43;
@@ -165,31 +180,14 @@ st.markdown(
         background-color: #099268;
     }
 
-    /* Main headings */
+    /* ==========================================
+       HEADINGS
+       ========================================== */
 
     h1, h2, h3 {
         color: #102A43;
         font-weight: 700;
     }
-
-    /* Main title animation */
-
-    .main-title {
-        color: #102A43;
-        font-size: 2.6rem;
-        font-weight: 800;
-        animation: slideIn 0.8s ease-out;
-        margin-bottom: 0.2rem;
-    }
-
-    .subtitle {
-        color: #627D98;
-        font-size: 1.05rem;
-        margin-bottom: 1.5rem;
-        animation: fadeIn 1.2s ease-in;
-    }
-
-    /* Section headings */
 
     .section-title {
         color: #102A43;
@@ -199,7 +197,81 @@ st.markdown(
         margin-bottom: 0.8rem;
     }
 
-    /* Metric cards */
+    /* ==========================================
+       ANIMATED WELCOME BANNER
+       ========================================== */
+
+    .welcome-banner {
+        position: relative;
+        overflow: hidden;
+        padding: 28px 32px;
+        margin: 10px 0 25px 0;
+        border-radius: 18px;
+
+        background: linear-gradient(
+            120deg,
+            #102A43,
+            #087F5B,
+            #102A43
+        );
+
+        background-size: 200% 200%;
+
+        color: #FFFFFF;
+
+        box-shadow: 0 8px 24px rgba(16, 42, 67, 0.15);
+
+        animation:
+            bannerEnter 0.9s ease-out,
+            bannerGlow 8s ease infinite;
+    }
+
+    .welcome-banner h2 {
+        color: #FFFFFF !important;
+        font-size: 1.8rem;
+        margin: 0 0 8px 0;
+    }
+
+    .welcome-banner p {
+        color: #E6F4F1;
+        font-size: 1rem;
+        margin: 0;
+    }
+
+    .welcome-banner .banner-icon {
+        font-size: 2.8rem;
+        margin-bottom: 8px;
+    }
+
+    @keyframes bannerEnter {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes bannerGlow {
+        0% {
+            background-position: 0% 50%;
+        }
+
+        50% {
+            background-position: 100% 50%;
+        }
+
+        100% {
+            background-position: 0% 50%;
+        }
+    }
+
+    /* ==========================================
+       METRIC CARDS
+       ========================================== */
 
     div[data-testid="stMetric"] {
         background-color: #FFFFFF;
@@ -207,15 +279,25 @@ st.markdown(
         border-left: 5px solid #087F5B;
         border-radius: 12px;
         padding: 20px;
+
         box-shadow: 0 4px 12px rgba(16, 42, 67, 0.06);
+
         animation: fadeIn 0.8s ease-in;
-        transition: transform 0.25s ease,
-                    box-shadow 0.25s ease;
+
+        transition:
+            transform 0.3s ease,
+            box-shadow 0.3s ease,
+            border-color 0.3s ease;
     }
 
-    div[data-testid="stMetric"]:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 8px 20px rgba(16, 42, 67, 0.12);
+    @media (hover: hover) {
+        div[data-testid="stMetric"]:hover {
+            transform: translateY(-6px) scale(1.01);
+
+            box-shadow: 0 12px 26px rgba(16, 42, 67, 0.13);
+
+            border-left-color: #D4AF37;
+        }
     }
 
     div[data-testid="stMetricLabel"] {
@@ -228,35 +310,171 @@ st.markdown(
         font-weight: 800;
     }
 
-    /* Buttons */
+    /* ==========================================
+       ANIMATED CASH COUNTER
+       ========================================== */
+
+    .cash-counter-card {
+        background: linear-gradient(
+            135deg,
+            #FFFFFF,
+            #E6F4F1
+        );
+
+        border: 1px solid #C6E8DB;
+        border-radius: 16px;
+
+        padding: 24px;
+        margin: 12px 0 22px 0;
+
+        box-shadow: 0 6px 18px rgba(16, 42, 67, 0.07);
+
+        animation: fadeIn 0.9s ease-out;
+    }
+
+    .cash-counter-label {
+        color: #486581;
+        font-size: 0.95rem;
+        font-weight: 600;
+        margin-bottom: 8px;
+    }
+
+    .cash-counter-value {
+        color: #087F5B;
+        font-size: 2.4rem;
+        font-weight: 800;
+        line-height: 1.3;
+        overflow-wrap: anywhere;
+    }
+
+    .cash-counter-caption {
+        color: #627D98;
+        font-size: 0.9rem;
+        margin-top: 8px;
+    }
+
+    /* ==========================================
+       CASH HEALTH INDICATOR
+       ========================================== */
+
+    .health-card {
+        background-color: #FFFFFF;
+        border: 1px solid #D9E2EC;
+        border-radius: 16px;
+        padding: 22px;
+        margin: 15px 0;
+
+        box-shadow: 0 5px 16px rgba(16, 42, 67, 0.06);
+
+        animation: fadeIn 0.8s ease-out;
+    }
+
+    .health-heading {
+        color: #102A43;
+        font-size: 1.15rem;
+        font-weight: 700;
+        margin-bottom: 8px;
+    }
+
+    .health-description {
+        color: #627D98;
+        font-size: 0.92rem;
+        margin-bottom: 14px;
+    }
+
+    .health-track {
+        width: 100%;
+        height: 16px;
+        overflow: hidden;
+        background-color: #E4EAF0;
+        border-radius: 999px;
+    }
+
+    .health-fill {
+        height: 100%;
+        border-radius: 999px;
+
+        animation: healthFill 1.2s ease-out both;
+
+        transition: width 0.5s ease;
+    }
+
+    @keyframes healthFill {
+        from {
+            width: 0%;
+        }
+    }
+
+    .health-status {
+        font-size: 1rem;
+        font-weight: 700;
+        margin-top: 12px;
+    }
+
+    /* ==========================================
+       BUTTONS
+       ========================================== */
 
     .stButton button,
-    .stDownloadButton button {
+    .stDownloadButton button,
+    .stFormSubmitButton button {
         background-color: #087F5B;
         color: #FFFFFF;
+
         border: none;
         border-radius: 8px;
+
         padding: 0.55rem 1rem;
+
         font-weight: 600;
-        transition: background-color 0.2s ease,
-                    transform 0.2s ease;
+
+        transition:
+            background-color 0.2s ease,
+            transform 0.2s ease,
+            box-shadow 0.2s ease;
     }
 
-    .stButton button:hover,
-    .stDownloadButton button:hover {
-        background-color: #066649;
-        color: #FFFFFF;
-        transform: translateY(-2px);
+    @media (hover: hover) {
+        .stButton button:hover,
+        .stDownloadButton button:hover,
+        .stFormSubmitButton button:hover {
+            background-color: #066649;
+            color: #FFFFFF;
+
+            transform: translateY(-2px);
+
+            box-shadow: 0 5px 12px rgba(8, 127, 91, 0.2);
+        }
     }
 
-    /* Input fields */
+    .stButton button:active,
+    .stDownloadButton button:active,
+    .stFormSubmitButton button:active {
+        transform: scale(0.98);
+    }
+
+    /* ==========================================
+       INPUT FIELDS
+       ========================================== */
 
     div[data-baseweb="input"] input,
     div[data-baseweb="textarea"] textarea {
         border-radius: 8px;
+
+        transition:
+            border-color 0.2s ease,
+            box-shadow 0.2s ease;
     }
 
-    /* Form containers */
+    div[data-baseweb="input"]:focus-within,
+    div[data-baseweb="textarea"]:focus-within {
+        box-shadow: 0 0 0 2px rgba(8, 127, 91, 0.12);
+        border-radius: 8px;
+    }
+
+    /* ==========================================
+       FORMS
+       ========================================== */
 
     div[data-testid="stForm"] {
         background-color: #FFFFFF;
@@ -265,13 +483,64 @@ st.markdown(
         border: 1px solid #D9E2EC;
     }
 
-    /* Alerts */
+    /* ==========================================
+       ALERTS AND SECTIONS
+       ========================================== */
 
     div[data-testid="stAlert"] {
         border-radius: 10px;
     }
 
-    /* Footer */
+    [data-testid="stVerticalBlockBorderWrapper"] {
+        animation: sectionAppear 0.7s ease-out both;
+    }
+
+    @keyframes sectionAppear {
+        from {
+            opacity: 0.65;
+        }
+
+        to {
+            opacity: 1;
+        }
+    }
+
+    /* ==========================================
+       GOLD DIVIDER
+       ========================================== */
+
+    .gold-line {
+        border: none;
+        height: 3px;
+
+        background: linear-gradient(
+            90deg,
+            #087F5B,
+            #D4AF37,
+            #087F5B
+        );
+
+        background-size: 200% 100%;
+
+        animation: dividerFlow 5s linear infinite;
+
+        margin-top: 10px;
+        margin-bottom: 20px;
+    }
+
+    @keyframes dividerFlow {
+        from {
+            background-position: 0% center;
+        }
+
+        to {
+            background-position: 200% center;
+        }
+    }
+
+    /* ==========================================
+       FOOTER
+       ========================================== */
 
     .footer {
         text-align: center;
@@ -281,39 +550,184 @@ st.markdown(
         padding-bottom: 10px;
     }
 
-    .gold-line {
-        border: none;
-        height: 2px;
-        background-color: #D4AF37;
-        margin-top: 10px;
-        margin-bottom: 20px;
-    }
+    /* ==========================================
+       ACCESSIBILITY
+       ========================================== */
 
-    /* Animations */
-
-    @keyframes fadeIn {
-        from {
-            opacity: 0;
-            transform: translateY(10px);
-        }
-
-        to {
-            opacity: 1;
-            transform: translateY(0);
+    @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+            animation-duration: 0.01ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: 0.01ms !important;
+            scroll-behavior: auto !important;
         }
     }
 
-    @keyframes slideIn {
-        from {
-            opacity: 0;
-            transform: translateX(-25px);
-        }
+/* ==========================================
+   CASHFLOW GUARDIAN — ENHANCED MOTION
+   ========================================== */
 
-        to {
-            opacity: 1;
-            transform: translateX(0);
-        }
+/* Smooth appearance of the main dashboard */
+
+.block-container {
+    animation: dashboardEnter 0.8s ease-out both;
+}
+
+@keyframes dashboardEnter {
+    from {
+        opacity: 0;
+        transform: translateY(14px);
     }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Animated metric cards */
+
+div[data-testid="stMetric"] {
+    transition:
+        transform 0.3s ease,
+        box-shadow 0.3s ease,
+        border-color 0.3s ease;
+}
+
+@media (hover: hover) {
+    div[data-testid="stMetric"]:hover {
+        transform: translateY(-6px) scale(1.01);
+        box-shadow: 0 12px 26px rgba(16, 42, 67, 0.13);
+        border-left-color: #D4AF37;
+    }
+}
+
+/* Gentle entrance for dashboard sections */
+
+[data-testid="stVerticalBlockBorderWrapper"] {
+    animation: sectionAppear 0.7s ease-out both;
+}
+
+@keyframes sectionAppear {
+    from {
+        opacity: 0.65;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+/* Buttons respond smoothly to interaction */
+
+.stButton button,
+.stDownloadButton button,
+.stFormSubmitButton button {
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease,
+        background-color 0.2s ease;
+}
+
+@media (hover: hover) {
+    .stButton button:hover,
+    .stDownloadButton button:hover,
+    .stFormSubmitButton button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 12px rgba(8, 127, 91, 0.2);
+    }
+}
+
+.stButton button:active,
+.stDownloadButton button:active,
+.stFormSubmitButton button:active {
+    transform: scale(0.98);
+}
+
+/* Highlight the main application title */
+
+.main-title {
+    background: linear-gradient(
+        90deg,
+        #102A43 0%,
+        #087F5B 55%,
+        #D4AF37 100%
+    );
+
+    background-size: 200% auto;
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+
+    animation:
+        slideIn 0.8s ease-out,
+        titleShimmer 6s ease-in-out infinite alternate;
+}
+
+@keyframes titleShimmer {
+    from {
+        background-position: 0% center;
+    }
+
+    to {
+        background-position: 100% center;
+    }
+}
+
+/* Smooth input focus */
+
+div[data-baseweb="input"] input,
+div[data-baseweb="textarea"] textarea {
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+div[data-baseweb="input"]:focus-within,
+div[data-baseweb="textarea"]:focus-within {
+    box-shadow: 0 0 0 2px rgba(8, 127, 91, 0.12);
+    border-radius: 8px;
+}
+
+/* Animated gold divider */
+
+.gold-line {
+    background: linear-gradient(
+        90deg,
+        #087F5B,
+        #D4AF37,
+        #087F5B
+    );
+
+    background-size: 200% 100%;
+    animation: dividerFlow 5s linear infinite;
+}
+
+@keyframes dividerFlow {
+    from {
+        background-position: 0% center;
+    }
+
+    to {
+        background-position: 200% center;
+    }
+}
+
+/* Respect users who prefer reduced motion */
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
 
     </style>
     """,
@@ -331,55 +745,60 @@ def add_transaction(
     amount,
     transaction_date
 ):
-    """Save a transaction for the currently logged-in user."""
+    """Save a transaction for the logged-in user."""
 
     connection = get_connection()
 
-    connection.execute(
-        """
-        INSERT INTO transactions (
-            description,
-            transaction_type,
-            amount,
-            transaction_date,
-            user_id
+    try:
+        connection.execute(
+            """
+            INSERT INTO transactions (
+                description,
+                transaction_type,
+                amount,
+                transaction_date,
+                user_id
+            )
+            VALUES (?, ?, ?, ?, ?)
+            """,
+            (
+                description.strip(),
+                transaction_type,
+                float(amount),
+                transaction_date.isoformat(),
+                current_user_id
+            )
         )
-        VALUES (?, ?, ?, ?, ?)
-        """,
-        (
-            description.strip(),
-            transaction_type,
-            float(amount),
-            transaction_date.isoformat(),
-            current_user_id
-        )
-    )
 
-    connection.commit()
-    connection.close()
+        connection.commit()
+
+    finally:
+        connection.close()
 
 
 def get_transactions():
-    """Retrieve only transactions belonging to the logged-in user."""
+    """Retrieve transactions belonging to the logged-in user."""
 
     connection = get_connection()
 
-    rows = connection.execute(
-        """
-        SELECT
-            id,
-            description,
-            transaction_type,
-            amount,
-            transaction_date
-        FROM transactions
-        WHERE user_id = ?
-        ORDER BY transaction_date DESC, id DESC
-        """,
-        (current_user_id,)
-    ).fetchall()
+    try:
+        rows = connection.execute(
+            """
+            SELECT
+                id,
+                description,
+                transaction_type,
+                amount,
+                transaction_date
+            FROM transactions
+            WHERE user_id = ?
+            ORDER BY transaction_date DESC, id DESC
+            """,
+            (current_user_id,)
+        ).fetchall()
 
-    connection.close()
+    finally:
+        connection.close()
 
     data = [dict(row) for row in rows]
 
@@ -405,7 +824,9 @@ def get_transactions():
             errors="coerce"
         )
 
-        df = df.dropna(subset=["transaction_date"])
+        df = df.dropna(
+            subset=["transaction_date"]
+        )
 
     return df
 
@@ -421,170 +842,250 @@ def update_transaction(
 
     connection = get_connection()
 
-    connection.execute(
-        """
-        UPDATE transactions
-        SET
-            description = ?,
-            transaction_type = ?,
-            amount = ?,
-            transaction_date = ?
-        WHERE id = ?
-        AND user_id = ?
-        """,
-        (
-            description.strip(),
-            transaction_type,
-            float(amount),
-            transaction_date.isoformat(),
-            int(transaction_id),
-            current_user_id
+    try:
+        connection.execute(
+            """
+            UPDATE transactions
+            SET
+                description = ?,
+                transaction_type = ?,
+                amount = ?,
+                transaction_date = ?
+            WHERE id = ?
+            AND user_id = ?
+            """,
+            (
+                description.strip(),
+                transaction_type,
+                float(amount),
+                transaction_date.isoformat(),
+                int(transaction_id),
+                current_user_id
+            )
         )
-    )
 
-    connection.commit()
-    connection.close()
+        connection.commit()
+
+    finally:
+        connection.close()
 
 
 def delete_transaction(transaction_id):
-    """Delete only a transaction owned by the logged-in user."""
+    """Delete a transaction owned by the logged-in user."""
 
     connection = get_connection()
 
-    connection.execute(
-        """
-        DELETE FROM transactions
-        WHERE id = ?
-        AND user_id = ?
-        """,
-        (
-            int(transaction_id),
-            current_user_id
+    try:
+        connection.execute(
+            """
+            DELETE FROM transactions
+            WHERE id = ?
+            AND user_id = ?
+            """,
+            (
+                int(transaction_id),
+                current_user_id
+            )
         )
-    )
 
-    connection.commit()
-    connection.close()
+        connection.commit()
 
-
+    finally:
+        connection.close()
 # ============================================================
-# SIDEBAR
+# SIDEBAR: LOGO, USER DETAILS AND BUSINESS SETTINGS
 # ============================================================
 
 st.sidebar.markdown(
     """
     <div style="text-align:center; padding:15px 0 10px 0;">
         <div style="font-size:3rem;">💰</div>
+
         <h2 style="color:#FFFFFF; margin-bottom:0;">
             CashFlow Guardian
         </h2>
+
         <p style="color:#D9E2EC; font-size:0.9rem;">
             Protect your business cash flow
         </p>
     </div>
+
     <hr style="border:1px solid #D4AF37;">
     """,
     unsafe_allow_html=True
 )
 
-st.sidebar.success(
-    f"Logged in as: {current_username}"
-)
-
-logout_button()
-
-st.sidebar.markdown("---")
-
-st.sidebar.markdown("### ⚙️ Business Settings")
-
-business_name = st.sidebar.text_input(
-    "Business name",
-    value=saved_business_name
-)
-
-starting_cash = st.sidebar.number_input(
-    "Starting cash (R)",
-    min_value=0.0,
-    value=18500.0,
-    step=500.0
-)
-
-warning_limit = st.sidebar.number_input(
-    "Low-cash warning limit (R)",
-    min_value=0.0,
-    value=5000.0,
-    step=500.0
-)
-
-forecast_days = st.sidebar.selectbox(
-    "Forecast period",
-    options=[7, 14, 30, 60, 90],
-    index=2,
-    format_func=lambda days: f"{days} days"
-)
-
-st.sidebar.caption(
-    "Business settings are currently session-based. "
-    "They are not permanently saved to your account."
-)
-
-
-# ============================================================
-# MAIN HEADER
-# ============================================================
-
-st.markdown(
-    '<div class="main-title">💰 CashFlow Guardian</div>',
-    unsafe_allow_html=True
-)
-
-st.markdown(
+# Display the logged-in username
+st.sidebar.markdown(
     f"""
-    <div class="subtitle">
-        Know your cash before it becomes a crisis.
-        Welcome to <b>{business_name}</b>.
+    <div style="
+        background-color:#087F5B;
+        color:#FFFFFF;
+        padding:12px;
+        border-radius:8px;
+        margin:10px 0;
+        font-weight:bold;
+    ">
+        Logged in as: {html.escape(str(current_username))}
     </div>
     """,
     unsafe_allow_html=True
 )
 
-st.markdown(
-    '<hr class="gold-line">',
+# Logout button
+logout_button()
+
+st.sidebar.markdown("---")
+
+# Business settings heading
+st.sidebar.markdown(
+    """
+    <h3 style="color:#FFFFFF;">
+        ⚙️ Business Settings
+    </h3>
+    """,
+    unsafe_allow_html=True
+)
+
+# Business name
+business_name = st.sidebar.text_input(
+    "Business name",
+    value=st.session_state.get(
+        "business_name",
+        saved_business_name
+    ),
+    key="business_name_input"
+)
+
+# Starting cash
+starting_cash = st.sidebar.number_input(
+    "Starting cash (R)",
+    min_value=0.0,
+    value=float(
+        st.session_state.get("starting_cash", 18500.0)
+    ),
+    step=500.0,
+    key="starting_cash_input"
+)
+
+# Low-cash warning limit
+warning_limit = st.sidebar.number_input(
+    "Low-cash warning limit (R)",
+    min_value=0.0,
+    value=float(
+        st.session_state.get("warning_limit", 5000.0)
+    ),
+    step=500.0,
+    key="warning_limit_input"
+)
+
+# Forecast period
+forecast_options = [7, 14, 30, 60, 90]
+
+previous_forecast = int(
+    st.session_state.get("forecast_days", 30)
+)
+
+forecast_days = st.sidebar.selectbox(
+    "Forecast period",
+    options=forecast_options,
+    index=(
+        forecast_options.index(previous_forecast)
+        if previous_forecast in forecast_options
+        else 2
+    ),
+    format_func=lambda days: f"{days} days",
+    key="forecast_days_input"
+)
+
+# Keep settings available to the rest of the app
+st.session_state["business_name"] = (
+    business_name.strip() or "My Business"
+)
+
+st.session_state["starting_cash"] = starting_cash
+st.session_state["warning_limit"] = warning_limit
+st.session_state["forecast_days"] = forecast_days
+
+# Settings information
+st.sidebar.markdown(
+    """
+    <div style="
+        color:#D9E2EC;
+        font-size:0.85rem;
+        margin-top:12px;
+        line-height:1.5;
+    ">
+        💡 Record income and expenses regularly to improve
+        your cash-flow forecast.
+    </div>
+    """,
     unsafe_allow_html=True
 )
 
 
-# ============================================================
-# LOAD TRANSACTIONS
-# ============================================================
+# Use a separate HTML component for the animation.
+# The exact balance is also displayed in the normal Streamlit
+# metrics below, so the value remains available without JavaScript.
 
-transactions = get_transactions()
+components.html(
+    f"""
+    <!DOCTYPE html>
+    <html>
+    <body style="margin:0; padding:0; height:0; overflow:hidden;">
 
-if transactions.empty:
-    income_total = 0.0
-    expense_total = 0.0
+    <script>
+        (function() {{
+            const target = {current_cash:.2f};
+            const duration = 1200;
+            const startTime = performance.now();
 
-else:
-    income_total = float(
-        transactions.loc[
-            transactions["transaction_type"] == "Income",
-            "amount"
-        ].sum()
-    )
+            const formatter = new Intl.NumberFormat("en-ZA", {{
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            }});
 
-    expense_total = float(
-        transactions.loc[
-            transactions["transaction_type"] == "Expense",
-            "amount"
-        ].sum()
-    )
+            function animateCounter(now) {{
+                const element = window.parent.document
+                    .getElementById("cashCounter");
 
+                if (!element) {{
+                    return;
+                }}
 
-# ============================================================
-# CALCULATE CURRENT CASH
-# ============================================================
+                const progress = Math.min(
+                    (now - startTime) / duration,
+                    1
+                );
 
-current_cash = starting_cash + income_total - expense_total
+                const easedProgress = 1 - Math.pow(
+                    1 - progress,
+                    3
+                );
+
+                const currentValue = target * easedProgress;
+
+                element.textContent =
+                    "R " + formatter.format(currentValue);
+
+                if (progress < 1) {{
+                    requestAnimationFrame(animateCounter);
+                }} else {{
+                    element.textContent =
+                        "R " + formatter.format(target);
+                }}
+            }}
+
+            requestAnimationFrame(animateCounter);
+        }})();
+    </script>
+
+    </body>
+    </html>
+    """,
+    height=0,
+    scrolling=False
+)
 
 
 # ============================================================
@@ -625,23 +1126,126 @@ with col4:
 
 
 # ============================================================
-# CASH FLOW STATUS
+# CASH HEALTH INDICATOR
 # ============================================================
 
 st.markdown("---")
 
 st.markdown(
-    '<p class="section-title">🛡️ Cash Flow Status</p>',
+    '<p class="section-title">🛡️ Cash Health Indicator</p>',
+    unsafe_allow_html=True
+)
+
+# This is a simple visual comparison with the warning limit.
+# It is not a complete measure of business financial health.
+
+if current_cash < 0:
+
+    health_status = "Critical — Negative cash balance"
+    health_colour = "#D93025"
+    health_icon = "🚨"
+
+elif current_cash <= warning_limit:
+
+    health_status = "Needs attention — Low cash balance"
+    health_colour = "#E09F1F"
+    health_icon = "⚠️"
+
+else:
+
+    health_status = "Healthy — Above your warning limit"
+    health_colour = "#087F5B"
+    health_icon = "✅"
+
+
+if warning_limit > 0:
+
+    health_percentage = (
+        current_cash / warning_limit
+    ) * 100
+
+    # Cap the bar between 0% and 100%.
+    health_bar_width = max(
+        0,
+        min(100, health_percentage)
+    )
+
+    if current_cash < 0:
+        health_bar_width = 0
+
+    health_description = (
+        f"Your balance is R {current_cash:,.2f}. "
+        f"Your warning limit is R {warning_limit:,.2f}."
+    )
+
+else:
+
+    # When the warning limit is zero, a percentage comparison
+    # would be undefined. Use a simple positive/negative display.
+    health_bar_width = 100 if current_cash > 0 else 0
+
+    health_description = (
+        f"Your balance is R {current_cash:,.2f}. "
+        "Your warning limit is R 0.00."
+    )
+
+
+safe_health_status = html.escape(health_status)
+safe_health_description = html.escape(health_description)
+
+st.markdown(
+    f"""
+    <div class="health-card">
+
+        <div class="health-heading">
+            {health_icon} Cash Balance Status
+        </div>
+
+        <div class="health-description">
+            {safe_health_description}
+        </div>
+
+        <div class="health-track">
+            <div
+                class="health-fill"
+                style="
+                    width:{health_bar_width:.2f}%;
+                    background-color:{health_colour};
+                "
+            ></div>
+        </div>
+
+        <div
+            class="health-status"
+            style="color:{health_colour};"
+        >
+            {safe_health_status}
+        </div>
+
+    </div>
+    """,
+    unsafe_allow_html=True
+)
+
+
+# ============================================================
+# CASH FLOW STATUS
+# ============================================================
+
+st.markdown(
+    '<p class="section-title">💡 Cash Flow Status</p>',
     unsafe_allow_html=True
 )
 
 if current_cash < 0:
+
     st.error(
-        "🚨 Your projected current cash is negative! "
+        "🚨 Your current cash balance is negative! "
         "Review your expenses and expected income."
     )
 
 elif current_cash <= warning_limit:
+
     st.warning(
         f"⚠️ Your current cash is R {current_cash:,.2f}. "
         f"This is at or below your warning limit of "
@@ -649,6 +1253,7 @@ elif current_cash <= warning_limit:
     )
 
 else:
+
     st.success(
         f"✅ Your current cash is R {current_cash:,.2f}. "
         "It is above your low-cash warning limit."
@@ -671,6 +1276,7 @@ with st.form("add_transaction_form", clear_on_submit=True):
     col1, col2 = st.columns(2)
 
     with col1:
+
         description = st.text_input(
             "Transaction description",
             placeholder="e.g. Selling groceries"
@@ -682,6 +1288,7 @@ with st.form("add_transaction_form", clear_on_submit=True):
         )
 
     with col2:
+
         amount = st.number_input(
             "Amount (R)",
             min_value=0.0,
@@ -691,7 +1298,8 @@ with st.form("add_transaction_form", clear_on_submit=True):
 
         transaction_date = st.date_input(
             "Transaction date",
-            value=date.today()
+            value=date.today(),
+            max_value=date.today()
         )
 
     submitted = st.form_submit_button(
@@ -702,22 +1310,26 @@ with st.form("add_transaction_form", clear_on_submit=True):
     if submitted:
 
         if not description.strip():
+
             st.error(
                 "Please enter a description for the transaction."
             )
 
         elif amount <= 0:
+
             st.error(
                 "The transaction amount must be greater than zero."
             )
 
         elif transaction_date > date.today():
+
             st.error(
                 "Please choose today or an earlier date "
                 "for a recorded transaction."
             )
 
         else:
+
             add_transaction(
                 description,
                 transaction_type,
@@ -745,7 +1357,7 @@ st.markdown(
 
 st.write(
     f"This forecast estimates your cash balance for the next "
-    f"{forecast_days} days."
+    f"{forecast_days} days using recorded transactions."
 )
 
 today = date.today()
@@ -755,28 +1367,42 @@ forecast_dates = [
     for day in range(forecast_days + 1)
 ]
 
-# Estimate daily net cash flow using the average recorded
-# net cash flow over the last 30 calendar days.
+
+# Calculate average daily net cash flow over the last 30 days.
 
 historical_start = pd.Timestamp(
     today - timedelta(days=29)
 )
 
-historical_end = pd.Timestamp(today)
+historical_end = (
+    pd.Timestamp(today)
+    + pd.Timedelta(days=1)
+    - pd.Timedelta(microseconds=1)
+)
 
 if transactions.empty:
+
     daily_net_average = 0.0
 
 else:
+
     recent_transactions = transactions[
-        (transactions["transaction_date"] >= historical_start)
-        & (transactions["transaction_date"] <= historical_end)
+        (
+            transactions["transaction_date"]
+            >= historical_start
+        )
+        & (
+            transactions["transaction_date"]
+            <= historical_end
+        )
     ].copy()
 
     if recent_transactions.empty:
+
         daily_net_average = 0.0
 
     else:
+
         recent_income = float(
             recent_transactions.loc[
                 recent_transactions["transaction_type"] == "Income",
@@ -822,19 +1448,33 @@ final_projected_cash = float(
     forecast_df.iloc[-1]["Projected Cash (R)"]
 )
 
+
+# ============================================================
+# FORECAST METRICS
+# ============================================================
+
 forecast_col1, forecast_col2 = st.columns(2)
 
 with forecast_col1:
+
     st.metric(
         label=f"Projected Cash in {forecast_days} Days",
-        value=f"R {final_projected_cash:,.2f}"
+        value=f"R {final_projected_cash:,.2f}",
+        delta=f"R {final_projected_cash - current_cash:,.2f}"
     )
 
 with forecast_col2:
+
     st.metric(
         label="Estimated Average Daily Net Cash Flow",
         value=f"R {daily_net_average:,.2f}"
     )
+
+
+st.caption(
+    "Forecasts are estimates based on recent recorded net cash flow. "
+    "They do not guarantee future income or expenses."
+)
 
 
 # ============================================================
@@ -847,13 +1487,16 @@ lowest_projected_cash = float(
 
 if lowest_projected_cash < 0:
 
-    first_negative = forecast_df[
+    negative_rows = forecast_df[
         forecast_df["Projected Cash (R)"] < 0
-    ].iloc[0]
+    ]
+
+    first_negative = negative_rows.iloc[0]
 
     st.error(
         f"🚨 Warning: Your forecast estimates that cash may "
-        f"become negative by {first_negative['Date']:%d %B %Y}. "
+        f"become negative by "
+        f"{first_negative['Date']:%d %B %Y}. "
         "Consider reducing expenses or increasing income."
     )
 
@@ -896,10 +1539,10 @@ with st.expander("📅 View Daily Forecast Details"):
 
     display_forecast = forecast_df.copy()
 
-    display_forecast["Date"] = display_forecast[
-        "Date"
-    ].apply(
-        lambda value: value.strftime("%d %B %Y")
+    display_forecast["Date"] = (
+        display_forecast["Date"].apply(
+            lambda value: value.strftime("%d %B %Y")
+        )
     )
 
     display_forecast["Projected Cash (R)"] = (
@@ -948,7 +1591,8 @@ else:
             filtered_transactions["description"].str.contains(
                 search_text.strip(),
                 case=False,
-                na=False
+                na=False,
+                regex=False
             )
         ]
 
@@ -1073,7 +1717,10 @@ else:
         selected_transaction = selected_rows.iloc[0]
 
         edit_tab, delete_tab = st.tabs(
-            ["✏️ Edit Transaction", "🗑️ Delete Transaction"]
+            [
+                "✏️ Edit Transaction",
+                "🗑️ Delete Transaction"
+            ]
         )
 
         # ----------------------------------------------------
@@ -1220,9 +1867,13 @@ with summary_col1:
 
     st.write(f"**Business:** {business_name}")
 
-    st.write(f"**Total income:** R {income_total:,.2f}")
+    st.write(
+        f"**Total income:** R {income_total:,.2f}"
+    )
 
-    st.write(f"**Total expenses:** R {expense_total:,.2f}")
+    st.write(
+        f"**Total expenses:** R {expense_total:,.2f}"
+    )
 
     st.write(
         f"**Net recorded cash flow:** "
@@ -1267,15 +1918,23 @@ st.markdown("---")
 st.markdown(
     """
     <div class="footer">
+
         <strong>💰 CashFlow Guardian</strong>
+
         <br>
+
         Helping small businesses understand and protect their cash flow.
+
         <br><br>
+
         Built with Python, Streamlit and SQLite.
+
         <br>
+
         <span style="color:#D4AF37;">
             Plan smarter. Spend wisely. Grow confidently.
         </span>
+
     </div>
     """,
     unsafe_allow_html=True
