@@ -565,170 +565,6 @@ st.markdown(
         }
     }
 
-/* ==========================================
-   CASHFLOW GUARDIAN — ENHANCED MOTION
-   ========================================== */
-
-/* Smooth appearance of the main dashboard */
-
-.block-container {
-    animation: dashboardEnter 0.8s ease-out both;
-}
-
-@keyframes dashboardEnter {
-    from {
-        opacity: 0;
-        transform: translateY(14px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-/* Animated metric cards */
-
-div[data-testid="stMetric"] {
-    transition:
-        transform 0.3s ease,
-        box-shadow 0.3s ease,
-        border-color 0.3s ease;
-}
-
-@media (hover: hover) {
-    div[data-testid="stMetric"]:hover {
-        transform: translateY(-6px) scale(1.01);
-        box-shadow: 0 12px 26px rgba(16, 42, 67, 0.13);
-        border-left-color: #D4AF37;
-    }
-}
-
-/* Gentle entrance for dashboard sections */
-
-[data-testid="stVerticalBlockBorderWrapper"] {
-    animation: sectionAppear 0.7s ease-out both;
-}
-
-@keyframes sectionAppear {
-    from {
-        opacity: 0.65;
-    }
-
-    to {
-        opacity: 1;
-    }
-}
-
-/* Buttons respond smoothly to interaction */
-
-.stButton button,
-.stDownloadButton button,
-.stFormSubmitButton button {
-    transition:
-        transform 0.2s ease,
-        box-shadow 0.2s ease,
-        background-color 0.2s ease;
-}
-
-@media (hover: hover) {
-    .stButton button:hover,
-    .stDownloadButton button:hover,
-    .stFormSubmitButton button:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 5px 12px rgba(8, 127, 91, 0.2);
-    }
-}
-
-.stButton button:active,
-.stDownloadButton button:active,
-.stFormSubmitButton button:active {
-    transform: scale(0.98);
-}
-
-/* Highlight the main application title */
-
-.main-title {
-    background: linear-gradient(
-        90deg,
-        #102A43 0%,
-        #087F5B 55%,
-        #D4AF37 100%
-    );
-
-    background-size: 200% auto;
-    background-clip: text;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-
-    animation:
-        slideIn 0.8s ease-out,
-        titleShimmer 6s ease-in-out infinite alternate;
-}
-
-@keyframes titleShimmer {
-    from {
-        background-position: 0% center;
-    }
-
-    to {
-        background-position: 100% center;
-    }
-}
-
-/* Smooth input focus */
-
-div[data-baseweb="input"] input,
-div[data-baseweb="textarea"] textarea {
-    transition:
-        border-color 0.2s ease,
-        box-shadow 0.2s ease;
-}
-
-div[data-baseweb="input"]:focus-within,
-div[data-baseweb="textarea"]:focus-within {
-    box-shadow: 0 0 0 2px rgba(8, 127, 91, 0.12);
-    border-radius: 8px;
-}
-
-/* Animated gold divider */
-
-.gold-line {
-    background: linear-gradient(
-        90deg,
-        #087F5B,
-        #D4AF37,
-        #087F5B
-    );
-
-    background-size: 200% 100%;
-    animation: dividerFlow 5s linear infinite;
-}
-
-@keyframes dividerFlow {
-    from {
-        background-position: 0% center;
-    }
-
-    to {
-        background-position: 200% center;
-    }
-}
-
-/* Respect users who prefer reduced motion */
-
-@media (prefers-reduced-motion: reduce) {
-    *,
-    *::before,
-    *::after {
-        animation-duration: 0.01ms !important;
-        animation-iteration-count: 1 !important;
-        transition-duration: 0.01ms !important;
-        scroll-behavior: auto !important;
-    }
-}
-
-
     </style>
     """,
     unsafe_allow_html=True
@@ -892,8 +728,10 @@ def delete_transaction(transaction_id):
 
     finally:
         connection.close()
+
+
 # ============================================================
-# SIDEBAR: LOGO, USER DETAILS AND BUSINESS SETTINGS
+# SIDEBAR
 # ============================================================
 
 st.sidebar.markdown(
@@ -915,114 +753,149 @@ st.sidebar.markdown(
     unsafe_allow_html=True
 )
 
-# Display the logged-in username
-st.sidebar.markdown(
-    f"""
-    <div style="
-        background-color:#087F5B;
-        color:#FFFFFF;
-        padding:12px;
-        border-radius:8px;
-        margin:10px 0;
-        font-weight:bold;
-    ">
-        Logged in as: {html.escape(str(current_username))}
-    </div>
-    """,
-    unsafe_allow_html=True
+st.sidebar.success(
+    f"Logged in as: {current_username}"
 )
 
-# Logout button
 logout_button()
 
 st.sidebar.markdown("---")
 
-# Business settings heading
-st.sidebar.markdown(
-    """
-    <h3 style="color:#FFFFFF;">
-        ⚙️ Business Settings
-    </h3>
-    """,
-    unsafe_allow_html=True
-)
+st.sidebar.markdown("### ⚙️ Business Settings")
 
-# Business name
 business_name = st.sidebar.text_input(
     "Business name",
-    value=st.session_state.get(
-        "business_name",
-        saved_business_name
-    ),
-    key="business_name_input"
+    value=saved_business_name
 )
 
-# Starting cash
 starting_cash = st.sidebar.number_input(
     "Starting cash (R)",
     min_value=0.0,
-    value=float(
-        st.session_state.get("starting_cash", 18500.0)
-    ),
-    step=500.0,
-    key="starting_cash_input"
+    value=18500.0,
+    step=500.0
 )
 
-# Low-cash warning limit
 warning_limit = st.sidebar.number_input(
     "Low-cash warning limit (R)",
     min_value=0.0,
-    value=float(
-        st.session_state.get("warning_limit", 5000.0)
-    ),
-    step=500.0,
-    key="warning_limit_input"
-)
-
-# Forecast period
-forecast_options = [7, 14, 30, 60, 90]
-
-previous_forecast = int(
-    st.session_state.get("forecast_days", 30)
+    value=5000.0,
+    step=500.0
 )
 
 forecast_days = st.sidebar.selectbox(
     "Forecast period",
-    options=forecast_options,
-    index=(
-        forecast_options.index(previous_forecast)
-        if previous_forecast in forecast_options
-        else 2
-    ),
-    format_func=lambda days: f"{days} days",
-    key="forecast_days_input"
+    options=[7, 14, 30, 60, 90],
+    index=2,
+    format_func=lambda days: f"{days} days"
 )
 
-# Keep settings available to the rest of the app
-st.session_state["business_name"] = (
-    business_name.strip() or "My Business"
+st.sidebar.caption(
+    "Business settings are currently session-based. "
+    "They are not permanently saved to your account."
 )
 
-st.session_state["starting_cash"] = starting_cash
-st.session_state["warning_limit"] = warning_limit
-st.session_state["forecast_days"] = forecast_days
 
-# Settings information
-st.sidebar.markdown(
-    """
-    <div style="
-        color:#D9E2EC;
-        font-size:0.85rem;
-        margin-top:12px;
-        line-height:1.5;
-    ">
-        💡 Record income and expenses regularly to improve
-        your cash-flow forecast.
+# ============================================================
+# MAIN HEADER AND WELCOME BANNER
+# ============================================================
+
+safe_business_name = html.escape(
+    str(business_name)
+)
+
+st.markdown(
+    f"""
+    <div class="welcome-banner">
+
+        <div class="banner-icon">💰</div>
+
+        <h2>Welcome to CashFlow Guardian</h2>
+
+        <p>
+            Protect your cash. Understand your spending.
+            Build a stronger business.
+        </p>
+
+        <p style="margin-top:12px;">
+            Business: <strong>{safe_business_name}</strong>
+        </p>
+
     </div>
     """,
     unsafe_allow_html=True
 )
 
+st.markdown(
+    '<hr class="gold-line">',
+    unsafe_allow_html=True
+)
+
+
+# ============================================================
+# LOAD TRANSACTIONS
+# ============================================================
+
+transactions = get_transactions()
+
+if transactions.empty:
+    income_total = 0.0
+    expense_total = 0.0
+
+else:
+    income_total = float(
+        transactions.loc[
+            transactions["transaction_type"] == "Income",
+            "amount"
+        ].sum()
+    )
+
+    expense_total = float(
+        transactions.loc[
+            transactions["transaction_type"] == "Expense",
+            "amount"
+        ].sum()
+    )
+
+
+# ============================================================
+# CALCULATE CURRENT CASH
+# ============================================================
+
+current_cash = (
+    starting_cash
+    + income_total
+    - expense_total
+)
+
+
+# ============================================================
+# ANIMATED CASH COUNTER
+# ============================================================
+
+st.markdown(
+    """
+    <div class="cash-counter-card">
+
+        <div class="cash-counter-label">
+            💵 YOUR CURRENT CASH BALANCE
+        </div>
+
+        <div
+            id="cashCounter"
+            class="cash-counter-value"
+            aria-live="polite"
+        >
+            R 0.00
+        </div>
+
+        <div class="cash-counter-caption">
+            Your balance updates when your transactions change.
+        </div>
+
+    </div>
+    """,
+    unsafe_allow_html=True
+)
 
 # Use a separate HTML component for the animation.
 # The exact balance is also displayed in the normal Streamlit
@@ -1760,13 +1633,12 @@ else:
                     step=50.0
                 )
 
-                edit_date = st.date_input(
-                    "Transaction date",
-                    value=selected_transaction[
-                        "transaction_date"
-                    ].date(),
-                    max_value=date.today()
-                )
+               
+       edit_date = st.date_input(
+    "Transaction date",
+    value=selected_transaction["transaction_date"]
+)
+
 
                 save_changes = st.form_submit_button(
                     "💾 Save Changes",
